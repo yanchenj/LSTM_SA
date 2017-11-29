@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from random import *
 from gensim.models import Word2Vec
 from nltk.corpus import movie_reviews
@@ -6,15 +7,15 @@ from nltk.corpus import movie_reviews
 if __name__ == "__main__":
 	pos_data, neg_data = [],[]
 
-	path = os.getcwd()+"/train/small_pos/"
+	path = os.getcwd()+"/aclImdb/train/small_pos/"
 	for filename in os.listdir(path):
-		pos_file = open("train/small_pos/"+filename, 'r')
+		pos_file = open("aclImdb/train/small_pos/"+filename, 'r')
 		pos_data = pos_data + pos_file.readlines()
 		pos_file.close()
 
-	path = os.getcwd()+"/train/small_neg/"
+	path = os.getcwd()+"/aclImdb/train/small_neg/"
 	for filename in os.listdir(path):
-		neg_file = open("train/small_neg/"+filename, 'r')
+		neg_file = open("aclImdb/train/small_neg/"+filename, 'r')
 		neg_data = neg_data + neg_file.readlines()
 		neg_file.close()
 
@@ -50,4 +51,30 @@ if __name__ == "__main__":
 				if word in model.wv.vocab:
 					train_data.append(model.wv[word])
 					train_label.append(0)
-	print train_data
+	np.savetxt('train_data.txt',train_data)
+
+	test_data, test_label = [],[]
+
+	path = os.getcwd()+"/aclImdb/test/pos/"
+	for filename in os.listdir(path):
+		pos_file = open("aclImdb/test/pos/"+filename, 'r')
+		for line in pos_file.readlines():
+			for word in line.split:
+				if word in model.wv.vocab:
+					test_data.append(model.wv[word])
+					test_label.append(1)
+		pos_file.close()
+
+	path = os.getcwd()+"/aclImdb/test/neg/"
+	for filename in os.listdir(path):
+		neg_file = open("aclImdb/test/pos/"+filename, 'r')
+		for line in neg_file.readlines():
+			for word in line.split:
+				if word in model.wv.vocab:
+					test_data.append(model.wv[word])
+					test_label.append(0)
+		neg_file.close()
+
+	return [np.asarray(train_data),np.asarray(train_label),np.asarray(test_data),np.asarray(test_label)]
+
+
