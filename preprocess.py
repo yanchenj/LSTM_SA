@@ -5,14 +5,14 @@ from nltk.corpus import movie_reviews
 if __name__ == "__main__":
 	preprocessed_data = []
 	outfile = open('preprocess.out', 'w')
-	for filename in glob.glob('../acllmdb/train/pos/'):
+	for filename in glob.glob('../acllmdb/train/small_pos/'):
 		trainfile = open(filename, 'r')
 		train_data = trainfile.readlines()
 		for line in train_data:
 			outfile.write("1 "+line+"\n")
 		trainfile.close()
 
-	for filename in glob.glob('../acllmdb/train/neg/'):
+	for filename in glob.glob('../acllmdb/train/small_neg/'):
 		trainfile = open(filename, 'r')
 		train_data = trainfile.readlines()
 		for line in train_data:
