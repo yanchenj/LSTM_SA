@@ -1,21 +1,32 @@
-import os
-			
+import glob
+from gensim.models import Word2Vec
+from nltk.corpus import movie_reviews
+
 if __name__ == "__main__":
 	preprocessed_data = []
 	outfile = open('preprocess.out', 'w')
-	path = os.getcwd()+"/train/small_pos/"
-	for filename in os.listdir(path):
-		trainfile = open("train/small_pos/"+filename, 'r')
+	for filename in glob.glob('../acllmdb/train/pos/'):
+		trainfile = open(filename, 'r')
 		train_data = trainfile.readlines()
 		for line in train_data:
 			outfile.write("1 "+line+"\n")
 		trainfile.close()
 
-	for filename in os.listdir(os.getcwd()+"/train/small_neg"):
-		trainfile = open("train/small_neg/"+filename, 'r')
+	for filename in glob.glob('../acllmdb/train/neg/'):
+		trainfile = open(filename, 'r')
 		train_data = trainfile.readlines()
 		for line in train_data:
 			outfile.write("0 "+line+"\n")
 		trainfile.close()
 	outfile.close()
+	
+	# model = Word2Vec(movie_reviews.sents())
+	# file = open('preprocess.out','r')
+	# label = []
+	# data = []
+	# for line in file.readlines().split():
+	# 	label.append(line[0])
+	# 	data.append(model.wv[line[1:]])
+	# np.savetxt('data.txt',data)
+	# np.savetxt('label.txt',label)
 

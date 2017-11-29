@@ -1,11 +1,3 @@
-"""
-LSTM for time series classification
-
-This model takes in time series and class labels.
-The LSTM models the time series. A fully-connected layer
-generates an output to be classified with Softmax
-"""
-
 import numpy as np
 import tensorflow as tf  #TF 1.1.0rc1
 tf.logging.set_verbosity(tf.logging.ERROR)
@@ -15,26 +7,17 @@ from sklearn import preprocessing
 from sklearn.cluster import KMeans
 
 
-#Set these directories
-# direc = '/home/rob/Dropbox/ml_projects/LSTM/UCR_TS_Archive_2015'
+# This function preprocess raw data and store them into dictionary
 
-def data_preprocessing(file):
-    
 def main():
-  """Load the data"""
-  ratio = np.array([0.8,0.9]) #Ratios where to split the training and validation set
-  #X_train,X_val,X_test,y_train,y_val,y_test = load_data(direc,ratio,dataset='ChlorineConcentration')
-  [X, y, X_, y_] = example0()
-  X_train,X_val,X_test,y_train,y_val,y_test = X, X, X_, y, y, y_
-
-  print X_test.shape
-  print y_test.shape
+  
+  [X_train, y_train, X_test, y_test] = preprocess()
   N,sl = X_train.shape
   num_classes = len(np.unique(y_train))
 
   """Hyperparamaters"""
   batch_size = 100
-  max_iterations = 5000
+  max_iterations = 1000
   dropout = 0.8
   config = {    'num_layers' :    3,               #number of layers of stacked RNN's
                 'hidden_size' :   128,             #memory cells in a layer
@@ -47,34 +30,29 @@ def main():
   epochs = np.floor(batch_size*max_iterations / N)
   print('Train %.0f samples in approximately %d epochs' %(N,epochs))
 
-  #Instantiate a model
   model = Model(config)
 
   """Session time"""
-  sess = tf.Session() #Depending on your use, do not forget to close the session
+  sess = tf.Session() 
   sess.run(model.init_op)
 
   cost_train_ma = -np.log(1/float(num_classes)+1e-9)  #Moving average training cost
   acc_train_ma = 0.0
-  try:
-    for i in range(max_iterations):
-      X_batch, y_batch = sample_batch(X_train,y_train,batch_size)
-
-      #Next line does the actual training
-      cost_train, acc_train, _ = sess.run([model.cost,model.accuracy, model.train_op],
-        feed_dict = {model.input: X_batch,model.labels: y_batch,model.keep_prob:dropout})
-      cost_train_ma = cost_train_ma*0.99 + cost_train*0.01
-      acc_train_ma = acc_train_ma*0.99 + acc_train*0.01
-      if i%100 == 0:
-      #Evaluate validation performance
-        X_batch, y_batch = sample_batch(X_val,y_val,batch_size)
-        cost_val, summ, acc_val = sess.run([model.cost,model.merged,model.accuracy],feed_dict = {model.input: X_batch, model.labels: y_batch, model.keep_prob:1.0})
-        print('At %5.0f/%5.0f: COST %5.3f/%5.3f(%5.3f) -- Acc %5.3f/%5.3f(%5.3f)' %(i,max_iterations,cost_train,cost_val,cost_train_ma,acc_train,acc_val,acc_train_ma))
-        plt.plot(i,acc_train,'r*')
-        plt.plot(i,cost_train,'kd')
+  for i in range(max_iterations):
+    X_batch, y_batch = sample_batch(X_train,y_train,batch_size)
+    cost_train, acc_train, _ = sess.run([model.cost,model.accuracy, model.train_op],
+    feed_dict = {model.input: X_batch,model.labels: y_batch,model.keep_prob:dropout})
+    cost_train_ma = cost_train_ma*0.99 + cost_train*0.01
+    acc_train_ma = acc_train_ma*0.99 + acc_train*0.01
+  
+  #Evaluate validation performance
+    if i%100 == 0:
+      X_batch, y_batch = sample_batch(X_test,y_test,batch_size)
+      cost_val, summ, acc_val = sess.run([model.cost,model.merged,model.accuracy],feed_dict = {model.input: X_batch, model.labels: y_batch, model.keep_prob:1.0})
+      print('At %5.0f/%5.0f: COST %5.3f/%5.3f(%5.3f) -- Acc %5.3f/%5.3f(%5.3f)' %(i,max_iterations,cost_train,cost_val,cost_train_ma,acc_train,acc_val,acc_train_ma))
+      plt.plot(i,acc_train,'r*')
+      plt.plot(i,cost_train,'kd')
     
-  except KeyboardInterrupt:
-    pass
   cost_val, summ, acc_val = sess.run([model.cost,model.merged,model.accuracy],feed_dict = {model.input: X_test, model.labels: y_test, model.keep_prob:1.0})
   epoch = float(i)*batch_size/N
   print('Trained %.1f epochs, accuracy is %5.3f and cost is %5.3f'%(epoch,acc_val,cost_val))
@@ -83,12 +61,9 @@ def main():
   plt.show()
   
  
-
 if __name__ == '__main__':
   main()
-#now run in your terminal:
-# $ tensorboard --logdir = <summaries_dir>
-# Replace <summaries_dir> with your own dir
+
 
 
 

@@ -25,28 +25,6 @@ from tensorflow.python.ops import clip_ops
 from tensorflow.contrib.rnn import LSTMCell
 from tensorflow.contrib.rnn.python.ops import core_rnn
 
-def load_data(direc,ratio,dataset):
-  """Input:
-  direc: location of the UCR archive
-  ratio: ratio to split training and testset
-  dataset: name of the dataset in the UCR archive"""
-  datadir = direc + '/' + dataset + '/' + dataset
-  data_train = np.loadtxt(datadir+'_TRAIN',delimiter=',')
-  data_test_val = np.loadtxt(datadir+'_TEST',delimiter=',')
-  DATA = np.concatenate((data_train,data_test_val),axis=0)
-  N = DATA.shape[0]
-
-  ratio = (ratio*N).astype(np.int32)
-  ind = np.random.permutation(N)
-  X_train = DATA[ind[:ratio[0]],1:]
-  X_val = DATA[ind[ratio[0]:ratio[1]],1:]
-  X_test = DATA[ind[ratio[1]:],1:]
-  # Targets have labels 1-indexed. We subtract one for 0-indexed
-  y_train = DATA[ind[:ratio[0]],0]-1
-  y_val = DATA[ind[ratio[0]:ratio[1]],0]-1
-  y_test = DATA[ind[ratio[1]:],0]-1
-  return X_train,X_val,X_test,y_train,y_val,y_test
-
 
 def sample_batch(X_train,y_train,batch_size):
   """ Function to sample a batch for training"""
@@ -84,10 +62,6 @@ class Model():
 
     output = outputs[-1]
 
-
-    #Generate a classification from the last cell_output
-    #Note, this is where timeseries classification differs from sequence to sequence
-    #modelling. We only output to Softmax at last time step
     with tf.name_scope("Softmax") as scope:
       with tf.variable_scope("Softmax_params"):
         softmax_w = tf.get_variable("softmax_w", [hidden_size, num_classes])
@@ -102,7 +76,6 @@ class Model():
       h1 = tf.summary.scalar('accuracy',self.accuracy)
       h2 = tf.summary.scalar('cost', self.cost)
 
-
     """Optimizer"""
     with tf.name_scope("Optimizer") as scope:
       tvars = tf.trainable_variables()
@@ -110,20 +83,7 @@ class Model():
       optimizer = tf.train.AdamOptimizer(learning_rate)
       gradients = zip(grads, tvars)
       self.train_op = optimizer.apply_gradients(gradients)
-      # Add histograms for variables, gradients and gradient norms.
-      # The for-loop loops over all entries of the gradient and plots
-      # a histogram. We cut of
-      # for gradient, variable in gradients:  #plot the gradient of each trainable variable
-      #       if isinstance(gradient, ops.IndexedSlices):
-      #         grad_values = gradient.values
-      #       else:
-      #         grad_values = gradient
-      #
-      #       tf.summary.histogram(variable.name, variable)
-      #       tf.summary.histogram(variable.name + "/gradients", grad_values)
-      #       tf.summary.histogram(variable.name + "/gradient_norm", clip_ops.global_norm([grad_values]))
-
-    #Final code for the TensorBoard
+    
     self.merged = tf.summary.merge_all()
     self.init_op = tf.global_variables_initializer()
     print('Finished computation graph')
