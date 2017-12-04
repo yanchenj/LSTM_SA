@@ -9,9 +9,9 @@ def preprocess():
 	train_data, train_label = [],[]
 	model = Word2Vec(movie_reviews.sents())
 
-	path = os.getcwd()+"/aclImdb/train/small_pos/"
+	path = os.getcwd()+"/aclImdb/train/pos/"
 	for filename in os.listdir(path):
-		pos_file = open("aclImdb/train/small_pos/"+filename, 'r')
+		pos_file = open("aclImdb/train/pos/"+filename, 'r')
 		for line in pos_file.readlines():
 			review = []
 			for word in line.split():
@@ -21,9 +21,9 @@ def preprocess():
 			train_label.append((0,1))
 		pos_file.close()
 
-	path = os.getcwd()+"/aclImdb/train/small_neg/"
+	path = os.getcwd()+"/aclImdb/train/neg/"
 	for filename in os.listdir(path):
-		neg_file = open("aclImdb/train/small_neg/"+filename, 'r')
+		neg_file = open("aclImdb/train/neg/"+filename, 'r')
 		for line in neg_file.readlines():
 			review = []
 			for word in line.split():
@@ -43,9 +43,9 @@ def preprocess():
 
 	test_data, test_label = [],[]
 
-	path = os.getcwd()+"/aclImdb/test/small_pos/"
+	path = os.getcwd()+"/aclImdb/test/pos/"
 	for filename in os.listdir(path):
-		pos_file = open("aclImdb/test/small_pos/"+filename, 'r')
+		pos_file = open("aclImdb/test/pos/"+filename, 'r')
 		for line in pos_file.readlines():
 			review = []
 			for word in line.split():
@@ -55,9 +55,9 @@ def preprocess():
 			test_label.append((0,1))
 		pos_file.close()
 
-	path = os.getcwd()+"/aclImdb/test/small_neg/"
+	path = os.getcwd()+"/aclImdb/test/neg/"
 	for filename in os.listdir(path):
-		neg_file = open("aclImdb/test/small_neg/"+filename, 'r')
+		neg_file = open("aclImdb/test/neg/"+filename, 'r')
 		for line in neg_file.readlines():
 			review = []
 			for word in line.split():
