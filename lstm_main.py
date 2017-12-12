@@ -10,12 +10,12 @@ y_train = np.load('train_label.npy', encoding = 'latin1')
 X_test = np.load('test_data.npy', encoding = 'latin1')
 y_test = np.load('test_label.npy', encoding = 'latin1')
 
-batchSize = 24
-lstmUnits = 64
+maxSeqLength = 300 #Maximum length of sentence
+numDimensions = 100 #Dimensions for each word vector
+batchSize = 30
+lstmUnits = 128
 numClasses = 2
 iterations = 100000
-maxSeqLength = 250 #Maximum length of sentence
-numDimensions = 100 #Dimensions for each word vector
 
 def getTrainBatch():
     labels = []
@@ -56,16 +56,16 @@ data = tf.assign(data, input_data)
 
 lstmCell = tf.contrib.rnn.BasicLSTMCell(lstmUnits)
 lstmCell = tf.contrib.rnn.DropoutWrapper(cell=lstmCell, output_keep_prob=0.75)
-value, _ = tf.nn.dynamic_rnn(lstmCell, data, dtype=tf.float32)
+output, _ = tf.nn.dynamic_rnn(lstmCell, data, dtype=tf.float32)
 
 weight = tf.Variable(tf.truncated_normal([lstmUnits, numClasses]))
 bias = tf.Variable(tf.constant(0.1, shape=[numClasses]))
-value = tf.transpose(value, [1, 0, 2])
-last = tf.gather(value, int(value.get_shape()[0]) - 1)
-prediction = (tf.matmul(last, weight) + bias)
+output = tf.transpose(output, [1, 0, 2])
+final = tf.gather(output, int(output.get_shape()[0]) - 1)
+prediction = (tf.matmul(final, weight) + bias)
 
-correctPred = tf.equal(tf.argmax(prediction,1), tf.argmax(labels,1))
-accuracy = tf.reduce_mean(tf.cast(correctPred, tf.float32))
+correctPrediction = tf.equal(tf.argmax(prediction,1), tf.argmax(labels,1))
+accuracy = tf.reduce_mean(tf.cast(correctPrediction, tf.float32))
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=labels))
 optimizer = tf.train.AdamOptimizer().minimize(loss)
@@ -84,17 +84,19 @@ writer = tf.summary.FileWriter(logdir, sess.graph)
 
 for i in range(iterations):
    #Next Batch of reviews
-   nextBatch, nextBatchLabels = getTrainBatch();
+   nextBatch, nextBatchLabels = getTrainBatch()
    sess.run(optimizer, {input_data: nextBatch, labels: nextBatchLabels})
    
    #Write summary to Tensorboard
    if (i % 50 == 0):
+       nextBatch, nextBatchLabels = getTestBatch()
        summary = sess.run(merged, {input_data: nextBatch, labels: nextBatchLabels})
        writer.add_summary(summary, i)
 
    # Save the network every 10,000 training iterations
-   if (i % 10000 == 0 and i != 0):
+   if (i % 20000 == 0 and i != 0):
        save_path = saver.save(sess, "models/pretrained_lstm.ckpt", global_step=i)
        print("saved to %s" % save_path)
+
 writer.close()
 
