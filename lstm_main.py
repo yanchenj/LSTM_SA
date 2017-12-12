@@ -88,7 +88,7 @@ for i in range(iterations):
    nextBatch, nextBatchLabels = getTrainBatch()
    sess.run(optimizer, {input_data: nextBatch, labels: nextBatchLabels})
    
-   #Write summary to Tensorboard
+   #Write summary to Tensorboard and get accuracy
    if (i % 100 == 0):
        nextBatch, nextBatchLabels = getTestBatch()
        summary = sess.run(merged, {input_data: nextBatch, labels: nextBatchLabels})
