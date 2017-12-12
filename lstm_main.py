@@ -4,11 +4,11 @@ from random import randint
 import datetime
 # from preprocess import preprocess
 
-# [X_train, y_train, X_test, y_test] = preprocess()
-X_train = np.load('train_data.npy', encoding = 'latin1')
-y_train = np.load('train_label.npy', encoding = 'latin1')
-X_test = np.load('test_data.npy', encoding = 'latin1')
-y_test = np.load('test_label.npy', encoding = 'latin1')
+[X_train, y_train, X_test, y_test] = preprocess()
+#X_train = np.load('train_data.npy', encoding = 'latin1')
+#y_train = np.load('train_label.npy', encoding = 'latin1')
+#X_test = np.load('test_data.npy', encoding = 'latin1')
+#y_test = np.load('test_label.npy', encoding = 'latin1')
 
 maxSeqLength = 250 #Maximum length of sentence
 numDimensions = 100 #Dimensions for each word vector
