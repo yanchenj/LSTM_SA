@@ -46,28 +46,26 @@ def getTestBatch():
     return arr, labels
 
 tf.reset_default_graph()
-with tf.device('/gpu:0'):
-    labels = tf.placeholder(tf.float32, [batchSize, numClasses])
-    input_data = tf.placeholder(tf.float32, [batchSize, maxSeqLength, numDimensions])
+labels = tf.placeholder(tf.float32, [batchSize, numClasses])
+input_data = tf.placeholder(tf.float32, [batchSize, maxSeqLength, numDimensions])
 
-    data = tf.Variable(tf.zeros([batchSize, maxSeqLength, numDimensions]),dtype=tf.float32)
-    data = tf.assign(data, input_data)
-    # data = tf.nn.embedding_lookup(wordVectors,input_data)
+data = tf.Variable(tf.zeros([batchSize, maxSeqLength, numDimensions]),dtype=tf.float32)
+data = tf.assign(data, input_data)
 
-    lstmCell = tf.contrib.rnn.BasicLSTMCell(lstmUnits)
-    lstmCell = tf.contrib.rnn.DropoutWrapper(cell=lstmCell, output_keep_prob=0.75)
-    output, _ = tf.nn.dynamic_rnn(lstmCell, data, dtype=tf.float32)
+lstmCell = tf.contrib.rnn.BasicLSTMCell(lstmUnits)
+lstmCell = tf.contrib.rnn.DropoutWrapper(cell=lstmCell, output_keep_prob=0.75)
+output, _ = tf.nn.dynamic_rnn(lstmCell, data, dtype=tf.float32)
 
-    weight = tf.Variable(tf.truncated_normal([lstmUnits, numClasses]))
-    bias = tf.Variable(tf.constant(0.1, shape=[numClasses]))
-    output = tf.transpose(output, [1, 0, 2])
-    final = tf.gather(output, int(output.get_shape()[0]) - 1)
-    prediction = (tf.matmul(final, weight) + bias)
+weight = tf.Variable(tf.truncated_normal([lstmUnits, numClasses]))
+bias = tf.Variable(tf.constant(0.1, shape=[numClasses]))
+output = tf.transpose(output, [1, 0, 2])
+final = tf.gather(output, int(output.get_shape()[0]) - 1)
+prediction = (tf.matmul(final, weight) + bias)
 
-    correctPrediction = tf.equal(tf.argmax(prediction,1), tf.argmax(labels,1))
-    accuracy = tf.reduce_mean(tf.cast(correctPrediction, tf.float32))
+correctPrediction = tf.equal(tf.argmax(prediction,1), tf.argmax(labels,1))
+accuracy = tf.reduce_mean(tf.cast(correctPrediction, tf.float32))
 
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=labels))
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=labels))
 
 optimizer = tf.train.AdamOptimizer().minimize(loss)
 
