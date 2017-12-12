@@ -10,10 +10,10 @@ y_train = np.load('train_label.npy', encoding = 'latin1')
 X_test = np.load('test_data.npy', encoding = 'latin1')
 y_test = np.load('test_label.npy', encoding = 'latin1')
 
-maxSeqLength = 300 #Maximum length of sentence
+maxSeqLength = 250 #Maximum length of sentence
 numDimensions = 100 #Dimensions for each word vector
-batchSize = 30
-lstmUnits = 128
+batchSize = 24
+lstmUnits = 64
 numClasses = 2
 iterations = 100000
 
